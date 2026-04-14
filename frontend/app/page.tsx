@@ -8,8 +8,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className={styles.navbar}>
         <div className={styles.navBrand}>
-          <div className={styles.logoIcon} />
-          <span className={styles.logoText}>RealEstateAI</span>
+          <img src="/logo.svg" alt="RealEstateAI Logo" style={{ width: '160px', height: '50px', objectFit: 'contain' }} />
         </div>
         <div className={styles.navLinks}>
           <Link href="/login" className={styles.loginButton}>
