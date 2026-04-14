@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String?        // Password can be null for OAuth users
+  googleId      String?        @unique
+  avatar        String?
+  name          String?
+  role          String         @default("user") // 'user', 'admin'
+  subscription  String         @default("free") // 'free', 'pro', 'enterprise'
+  status        String         @default("active") // 'active', 'pending', etc.
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  subscriptions Subscription[]
+  teamMemberships TeamMember[]
+  activityLogs    ActivityLog[]
+  notifications   Notification[]
+}
+
+model Subscription {
+  id          String    @id @default(uuid())
+  userId      String
+  type        String
+  status      String    @default("active")
+  renewalDate DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Team {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  members     TeamMember[]
+  activities  ActivityLog[]
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  role      String   @default("MEMBER") // 'OWNER', 'ADMIN', 'MEMBER'
+  joinedAt  DateTime @default(now())
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  teamId    String?
+  action    String   // 'TEAM_CREATED', 'MEMBER_ADDED', 'LOGIN', etc.
+  details   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  permissions String[] // Array of permissions like 'USER_CREATE', 'DEPT_MANAGE'
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("info") // 'info', 'success', 'warning', 'error'
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

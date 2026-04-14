@@ -1,0 +1,15 @@
+# Ignore the following files and folders
+docs/
+.env
+node_modules/
+__pycache__/
+*.pyc
+.next/
+dist/
+build/
+.venv/
+venv/
+*.log
+.DS_Store
+.idea/
+.vscode/
